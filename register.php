@@ -87,9 +87,10 @@ try {
   }
 
   // Insert
+   // Insert (ya con rol y estado por defecto)
   $insert = $pdo->prepare("
-    INSERT INTO usuarios (nombre, email, telefono, password_hash)
-    VALUES (:nombre, :email, :telefono, :password_hash)
+    INSERT INTO usuarios (nombre, email, telefono, password_hash, tipo_usuario, estado)
+    VALUES (:nombre, :email, :telefono, :password_hash, 'usuario', 'activo')
   ");
 
   $insert->execute([
@@ -98,6 +99,7 @@ try {
     ':telefono' => $telDigits,
     ':password_hash' => $passwordHash
   ]);
+
 
   flash('ok', 'Registro exitoso. Tu cuenta fue creada correctamente.');
 

@@ -5,6 +5,11 @@ session_start();
 
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
+
+// Si ya está logueado
+$isLogged = !empty($_SESSION['user_id']);
+$nombreSesion = $_SESSION['nombre'] ?? '';
+$rolSesion = $_SESSION['tipo_usuario'] ?? '';
 ?>
 <!doctype html>
 <html lang="es">
@@ -20,7 +25,7 @@ unset($_SESSION['flash']);
       --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
-      --focus: #6366f1; /* indigo */
+      --focus: #6366f1;
       --shadow: 0 18px 40px rgba(2, 8, 23, .10);
       --radius: 16px;
     }
@@ -55,6 +60,10 @@ unset($_SESSION['flash']);
       padding: 22px 22px 14px;
       border-bottom: 1px solid var(--border);
       background: linear-gradient(180deg, rgba(99,102,241,.08), transparent);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
     }
 
     .header h2{
@@ -70,6 +79,41 @@ unset($_SESSION['flash']);
       line-height: 1.4;
     }
 
+    .header-actions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+
+    .linkbtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background:#fff;
+      color: var(--text);
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration:none;
+      cursor:pointer;
+      transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
+    }
+    .linkbtn:hover{
+      filter: brightness(1.03);
+      box-shadow: 0 10px 18px rgba(2, 6, 23, .08);
+    }
+    .linkbtn:active{ transform: translateY(1px); }
+
+    .linkbtn.primary{
+      border: 0;
+      color:#fff;
+      background: linear-gradient(90deg, #0f172a, #111827);
+    }
+
     .content{
       padding: 18px 22px 22px;
     }
@@ -83,6 +127,24 @@ unset($_SESSION['flash']);
     }
     .ok{ background:#ecfdf5; color:#065f46; border-color:#a7f3d0; }
     .err{ background:#fef2f2; color:#991b1b; border-color:#fecaca; }
+
+    .session-box{
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .session-box small{
+      color: var(--muted);
+      display:block;
+      margin-top: 2px;
+    }
 
     form{
       display: grid;
@@ -122,11 +184,11 @@ unset($_SESSION['flash']);
       gap: 12px;
     }
 
-    /* Responsive: en celular se va a 1 columna */
     @media (max-width: 540px){
       .grid-2{ grid-template-columns: 1fr; }
       .header{ padding: 18px 16px 12px; }
       .content{ padding: 14px 16px 18px; }
+      .header-actions{ width: 100%; justify-content:flex-start; }
     }
 
     .field-err{
@@ -171,8 +233,19 @@ unset($_SESSION['flash']);
 <body>
   <div class="wrap">
     <div class="header">
-      <h2>Registro de usuario</h2>
-      <p>Campos obligatorios. La contraseña se guarda con hash seguro (no texto plano).</p>
+      <div>
+        <h2>Registro de usuario</h2>
+        <p>Campos obligatorios. La contraseña se guarda con hash seguro (no texto plano).</p>
+      </div>
+
+      <div class="header-actions">
+        <?php if (!$isLogged): ?>
+          <a class="linkbtn primary" href="login.php">Iniciar sesión</a>
+        <?php else: ?>
+          <a class="linkbtn primary" href="panel.php">Ir al panel</a>
+          <a class="linkbtn" href="logout.php">Cerrar sesión</a>
+        <?php endif; ?>
+      </div>
     </div>
 
     <div class="content">
@@ -182,6 +255,21 @@ unset($_SESSION['flash']);
         </div>
       <?php endif; ?>
 
+      <?php if ($isLogged): ?>
+        <div class="session-box">
+          <div>
+            <strong>Sesión activa:</strong> <?= htmlspecialchars($nombreSesion) ?>
+            <small>Rol: <?= htmlspecialchars($rolSesion ?: 'usuario') ?></small>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <a class="linkbtn primary" href="panel.php">Panel</a>
+            <a class="linkbtn" href="logout.php">Salir</a>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <!-- Si ya está logueado, puedes ocultar el registro o dejarlo visible.
+           Aquí lo dejamos visible pero puedes comentar el form si quieres bloquearlo. -->
       <form id="regForm" method="POST" action="register.php" novalidate>
 
         <div class="field">
@@ -227,6 +315,12 @@ unset($_SESSION['flash']);
         <button class="btn" type="submit">Crear cuenta</button>
         <div class="footer-note">Tus datos se validan también en el servidor.</div>
       </form>
+
+      <?php if (!$isLogged): ?>
+        <div class="footer-note" style="margin-top:14px;">
+          ¿Ya tienes cuenta? <a href="login.php" style="color:#6366f1; font-weight:800; text-decoration:none;">Inicia sesión</a>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 
